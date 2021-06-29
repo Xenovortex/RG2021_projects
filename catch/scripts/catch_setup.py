@@ -15,12 +15,12 @@ filepath   = os.path.join(catch_path, 'scripts/squares.npy')
 squares    = np.load(filepath)
 wall_obj   = rgt.game_object('walls', [squares], np.array([1]))
 
-name      = "cat"
+name      = "cat_obj"
 cat_id    = 1
 hit_box   = {"type":"rectangle","height":2,"width":2}
 cat_obj   = rgt.dynamic_object(name,hit_box,cat_id)
 
-name      = "mouse"
+name      = "mouse_obj"
 mouse_id  = 1
 hit_box   = {"type":"rectangle","height":2,"width":2}
 mouse_obj = rgt.dynamic_object(name,hit_box,mouse_id)
