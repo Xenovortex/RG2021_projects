@@ -11,9 +11,9 @@ rospack    = rospkg.RosPack()
 catch_path = rospack.get_path('catch')
 
 
-filepath   = os.path.join(catch_path, 'scripts/squares.npy')
-squares    = np.load(filepath)
-wall_obj   = rgt.game_object('walls', [squares], np.array([1]))
+filepath   = os.path.join(catch_path, 'maps/cheese.npy')
+cheese     = np.load(filepath)
+cheese_obj = rgt.game_object('cheese_obj', [cheese], np.array([1]))
 
 name      = "cat_obj"
 cat_id    = 1
@@ -26,25 +26,10 @@ hit_box   = {"type":"rectangle","height":2,"width":2}
 mouse_obj = rgt.dynamic_object(name,hit_box,mouse_id)
 
 
-
-
-
-def odom_callback(self, odom, agent):
-    pos = np.array([odom.pose.pose.position.x,
-                    odom.pose.pose.position.y])
-    #TODO convert odom coordinates into map coordinates
-    rogata.set_pos(agent,pos)
-
-
-
-
-
 if __name__ == '__main__':
     rospy.init_node("rogata_engine")
     try:
-        example_scene = rgt.scene([wall_obj,cat_obj,mouse_obj])
-        rogata = rgt.rogata_helper()
-        rospy.Subscriber("cat/odom"  , Odometry, odom_callback,"cat")
-        rospy.Subscriber("mouse/odom", Odometry, odom_callback, "mouse")
+        example_scene = rgt.scene([cheese_obj,cat_obj,mouse_obj])
+        rospy.spin()
     except rospy.ROSInterruptException:
         pass

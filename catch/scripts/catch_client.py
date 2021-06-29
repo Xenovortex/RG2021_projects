@@ -19,12 +19,16 @@ if __name__ == '__main__':
 
     try:
         while not rospy.is_shutdown():
-            cat_pos   = rogata.get_pos("cat_obj")
-            mouse_pos = rogata.get_pos("mouse_obj")
+            cat_pos    = rogata.get_pos("cat_obj")
+            mouse_pos  = rogata.get_pos("mouse_obj")
+            cheese_pos = rogata.get_pos("cheese_obj")
 
             if np.linalg.norm(mouse_pos-cat_pos) <= 3:
                 game_state = -1
                 print("The Cat Wins!")
+            if rogata.inside("cheese_obj",mouse_pos):
+                game_state = 1
+                print("The Mouse Wins!")
             #TODO add cheese winning condition
 
 
