@@ -1,37 +1,39 @@
 <launch>
 
+  <env name="GAZEBO_MODEL_PATH" value="$(find catch)/models:$(optenv GAZEBO_MODEL_PATH)" />
+
   <!-- set params for initialization -->
-  <param name="szenario" value="squares"/>
+  <param name="szenario" value="map_1"/>
   <arg name="model" default="burger"/>
   <arg name="first_tb3"  default="cat"/>
   <arg name="second_tb3" default="mouse"/>
 
   <!-- cat start position -->
-  <arg name="first_tb3_x_pos" default="-2.5"/>
-  <arg name="first_tb3_y_pos" default=" 3.5"/>
+  <arg name="first_tb3_x_pos" default="-1.0"/>
+  <arg name="first_tb3_y_pos" default=" 2.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
   <arg name="first_tb3_yaw"   default=" 0.0"/>
   <param name="cat_start_pos_x" value="$(arg first_tb3_x_pos)"/>
   <param name="cat_start_pos_y" value="$(arg first_tb3_y_pos)"/>
 
   <!-- mouse start position -->
-  <arg name="second_tb3_x_pos" default=" 3.5"/>
-  <arg name="second_tb3_y_pos" default="-2.5"/>
+  <arg name="second_tb3_x_pos" default=" 2.0"/>
+  <arg name="second_tb3_y_pos" default="-1.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
   <arg name="second_tb3_yaw"   default=" 1.57"/>
   <param name="mouse_start_pos_x" value="$(arg second_tb3_x_pos)"/>
   <param name="mouse_start_pos_y" value="$(arg second_tb3_y_pos)"/>
   
   <!-- cheese position -->  
-  <arg name="cheese_x_pos" default="-0.5"/>
-  <arg name="cheese_y_pos" default=" 1.5"/>
+  <arg name="cheese_x_pos" default="-2.0"/>
+  <arg name="cheese_y_pos" default=" 1.0"/>
   <param name="cheese_pos_x" value="$(arg cheese_x_pos)"/>
   <param name="cheese_pos_y" value="$(arg cheese_y_pos)"/>
   
 
   <!-- empty world simulation -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find catch)/worlds/squares.world"/>
+    <arg name="world_name" value="$(find catch)/worlds/map_1.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -75,7 +77,7 @@
   </group> 	
 
   	
-  <node name="refree" type="rogata_refree.py" pkg="catch"  />
+  <node name="refree" type="refree.py" pkg="catch"  />
 
 
   <!-- <include file="$(find group_x)/launch/team_cat.launch"/> -->
