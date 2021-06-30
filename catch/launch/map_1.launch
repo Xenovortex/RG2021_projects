@@ -45,7 +45,7 @@
   <group ns = "$(arg first_tb3)">
     <param name="robot_description" command="$(find xacro)/xacro $(find catch)/urdf/turtlebot3_$(arg model)_cat.urdf.xacro" />
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
-      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="publish_frequency" type="double" value="10.0" />
       <param name="tf_prefix" value="$(arg first_tb3)" />
     </node>
     
@@ -59,7 +59,7 @@
     <param name="robot_description" command="$(find xacro)/xacro $(find catch)/urdf/turtlebot3_$(arg model)_mouse.urdf.xacro" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
-      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="publish_frequency" type="double" value="10.0" />
       <param name="tf_prefix" value="$(arg second_tb3)" />
     </node>
 
@@ -70,8 +70,9 @@
 
 
   	
-  <node name="catch_setup" type="catch_setup.py" pkg="catch"  />
-  <!-- <node name="catch_tracker" type="catch_tracker.py" pkg="catch"  /> -->
+  <node name="map_1_setup" type="map_1_setup.py" pkg="catch"  />
+  <node name="catch_tracker" type="catch_tracker.py" pkg="catch"  /> 
+  <node name="catch_client" type="catch_client.py" pkg="catch"  /> 
 
 
   <!-- <include file="$(find group_x)/launch/team_cat.launch"/> -->

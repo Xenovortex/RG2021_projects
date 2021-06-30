@@ -23,7 +23,7 @@ if __name__ == '__main__':
             mouse_pos  = rogata.get_pos("mouse_obj")
             cheese_pos = rogata.get_pos("cheese_obj")
 
-            if np.linalg.norm(mouse_pos-cat_pos) <= 3:
+            if np.linalg.norm(mouse_pos-cat_pos) <= 20:
                 game_state = -1
                 print("The Cat Wins!")
             if rogata.inside("cheese_obj",mouse_pos):
