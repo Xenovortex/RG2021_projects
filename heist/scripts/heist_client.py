@@ -42,6 +42,7 @@ if __name__ == '__main__':
             evader_visible = visibility(guard_pos,evader_pos,["walls_obj"],1000)
             if evader_visible:
                 game_state = -1
+                print("The Guard Wins!")
 
 
             pub.publish(game_state)

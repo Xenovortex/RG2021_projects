@@ -11,9 +11,13 @@ rospack    = rospkg.RosPack()
 catch_path = rospack.get_path('heist')
 
 
-filepath   = os.path.join(catch_path, 'maps/walls.npy')
-walls      = np.load(filepath)
-walls_obj  = rgt.game_object('walls_obj', [walls], np.array([1]))
+filepath   = os.path.join(catch_path, 'maps/left_wall.npy')
+left_wall  = np.load(filepath)
+filepath   = os.path.join(catch_path, 'maps/right_wall.npy')
+right_wall = np.load(filepath)
+filepath   = os.path.join(catch_path, 'maps/outer_wall.npy')
+outer_wall = np.load(filepath)
+walls_obj  = rgt.game_object('walls_obj', [right_wall,left_wall,outer_wall], np.array([1]))
 
 name      = "guard_obj"
 cat_id    = 1
