@@ -77,6 +77,8 @@
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model goal1 -x $(arg goal_x_pos) -y $(arg goal_y_pos) -param robot_description" />
   </group> 	
 
-
+  <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />
+  <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
+  <!-- <node name="heist_client" type="heist_client.py" pkg="heist"  />  -->
   
 </launch>
