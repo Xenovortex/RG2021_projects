@@ -31,6 +31,8 @@ if __name__ == '__main__':
 
     game_state = Int32()
     game_state = 0
+
+    has_bounty = 0
     rate       = rospy.Rate(10)  # 10hz
     pub        = rospy.Publisher("game_state", Int32, queue_size=10)
 
@@ -40,6 +42,12 @@ if __name__ == '__main__':
             evader_pos   = rogata.get_pos("evader_obj")
 
             evader_visible = visibility(guard_pos,evader_pos,["walls_obj"],1000)
+            if  rogata.inside("goal_obj",evader_pos):
+                has_bounty = 1
+                print("Got the Bounty!")
+            if  rogata.inside("entry_obj",evader_pos) and has_bounty:
+                game_state = 1
+                print ("The Evader Wins")
             if evader_visible:
                 game_state = -1
                 print("The Guard Wins!")
