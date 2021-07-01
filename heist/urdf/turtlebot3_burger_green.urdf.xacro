@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <robot name="turtlebot3_burger" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find catch)/urdf/common_properties.xacro"/>
-  <xacro:include filename="$(find catch)/urdf/turtlebot3_burger_cat.gazebo.xacro"/>
+  <xacro:include filename="$(find heist)/urdf/common_properties.xacro"/>
+  <xacro:include filename="$(find heist)/urdf/turtlebot3_burger_green.gazebo.xacro"/>
 
   <link name="base_footprint"/>
 
@@ -17,7 +17,7 @@
       <geometry>
         <mesh filename="package://turtlebot3_description/meshes/bases/burger_base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="light_black"/>
+      <material name="green"/>
     </visual>
 
     <collision>
