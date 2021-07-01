@@ -54,7 +54,7 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <model name='map_1'>
+    <model name='map_2'>
       <static>1</static>
       <link name='link'>
         <collision name='collision'>
@@ -91,9 +91,9 @@
           </geometry>
           <material>
             <script>
-              <uri>model://map_1/materials/scripts</uri>
-              <uri>model://map_1/materials/textures/</uri>
-              <name>Map1/Image</name>
+              <uri>model://map_2/materials/scripts</uri>
+              <uri>model://map_2/materials/textures/</uri>
+              <name>Map2/Image</name>
             </script>
           </material>
         </visual>
