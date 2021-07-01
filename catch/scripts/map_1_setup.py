@@ -11,9 +11,13 @@ rospack    = rospkg.RosPack()
 catch_path = rospack.get_path('catch')
 
 
-filepath   = os.path.join(catch_path, 'maps/cheese.npy')
-cheese     = np.load(filepath)
-cheese_obj = rgt.game_object('cheese_obj', [cheese], np.array([1]))
+
+cheese_contours =[]
+for i in [1,2,3,4]:
+    filepath   = os.path.join(catch_path, 'maps/cheese_'+str(i)+'.npy')
+    cheese     = np.load(filepath)
+    cheese_contours.append(cheese)
+cheese_obj = rgt.game_object('cheese_obj', cheese_contours, np.ones(4))
 
 name      = "cat_obj"
 cat_id    = 1
