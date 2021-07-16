@@ -3,6 +3,7 @@ import rospy
 import math
 import sys
 import numpy as np
+from numpy import linalg as LA
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 
@@ -15,6 +16,7 @@ class Predict_guard_movement:
         self.current_state_guard = np.zeros(5)
         self.last_state_guard = np.zeros(5)
         self.future_state_guard = np.zeros(5)
+        #self.score = np.zeros(2)
 
         rate = rospy.Rate(0.5)  # 0.5hz
         rospy.Subscriber(self.perception_topic, Odometry, self.perception_callback)
@@ -50,20 +52,39 @@ class Predict_guard_movement:
         self.current_state_guard[3] = linear_v
         self.current_state_guard[4] = angular_w
 
+
+        #
+
+        rospy.loginfo("guard_prediction_perception: {}".format(self.current_state_guard))
+
         self.predict_future()
 
         self.pub.publish(odom)
 
-        rospy.loginfo("guard_prediction_perception: {}".format(self.current_state_guard))
 
         
     def predict_future(self):
-        # TODO: prediction
-        self.future_state_guard[0] = self.current_state_guard[0]
-        self.future_state_guard[1] = self.current_state_guard[1]
-        self.future_state_guard[2] = self.current_state_guard[2]
+        self.v2_same_movement()
+        rospy.loginfo("future_guard_position: {}".format(self.future_state_guard))
+        #choice = np.argmax(self.score)
+        #if choice == 0:
+        #    self.v1_standing_still()
+        #elif choice == 1:
+        #    self.v2_same_movement()
+
+    def v1_standing_still(self):
+        self.future_state_guard = self.current_state_guard
+
+    def v2_same_movement(self):
+        self.future_state_guard[0] = self.current_state_guard[0] + self.current_state_guard[3] * math.cos(self.current_state_guard[4]) * 2
+        self.future_state_guard[1] = self.current_state_guard[1] + self.current_state_guard[3] * math.sin(self.current_state_guard[4]) * 2
+        self.future_state_guard[2] = self.current_state_guard[2] + self.current_state_guard[4] * 2
         self.future_state_guard[3] = self.current_state_guard[3]
         self.future_state_guard[4] = self.current_state_guard[4]
+
+
+
+        
 
         
 
