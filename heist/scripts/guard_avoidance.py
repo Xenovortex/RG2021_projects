@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
+import os
 import rospy
 import math
 import sys
 import numpy as np
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
+from geometry_msgs.msg import Pose2D
+import rogata_library as rgt
+from rogata_engine.srv import *
+import rospkg
+
 
 class Guard_avoidance:
 
@@ -45,7 +51,7 @@ class Guard_avoidance:
         self.state_evader[2] = orientation
         self.state_evader[3] = linear_v
         self.state_evader[4] = angular_w
-        rospy.loginfo("guard_avoidance_odom: {}".format(self.state_evader))
+        #rospy.loginfo("guard_avoidance_odom: {}".format(self.state_evader))
 
 
     def prediction_callback(self, odom):
@@ -66,7 +72,7 @@ class Guard_avoidance:
         self.future_state_guard[3] = linear_v
         self.future_state_guard[4] = angular_w
 
-        rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
+        #rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
 
         # DUMMY DATA
         self.pub.publish(odom)
@@ -89,26 +95,44 @@ class Guard_avoidance:
         self.state_guard[3] = linear_v
         self.state_guard[4] = angular_w
 
-        rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
+        #rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
+        rospy.loginfo("walls: {}".format(["walls_obj"]))
+        self.laser_scanner(["walls_obj"], self.state_guard, np.arange(-10, 10, 0.1))
 
 
-    def visibility(guard,thief,wall_objects,max_seeing_distance):
-        distance   = np.linalg.norm(thief-guard)
-        direction  = (thief-guard)/distance
-        direction  = np.arctan2(direction[1],direction[0])
+    def laser_scanner(self, object_list,test_point,angles):
+        # rospack    = rospkg.RosPack()
+        # catch_path = rospack.get_path('heist')
 
-        min_intersect = guard + max_seeing_distance * np.array([np.cos(direction),np.sin(direction)])
+        # filepath   = os.path.join(catch_path, 'maps/left_wall.npy')
+        # left_wall  = np.load(filepath)
+        # filepath   = os.path.join(catch_path, 'maps/right_wall.npy')
+        # right_wall = np.load(filepath)
+        # filepath   = os.path.join(catch_path, 'maps/outer_wall.npy')
+        # outer_wall = np.load(filepath)
+        # walls_obj  = rgt.game_object('walls_obj', [right_wall,left_wall,outer_wall], np.array([1]))
+        intersect = rospy.ServiceProxy('intersect_line',RequestInter)
+        # rogata = rgt.scene([walls_obj])
+        scan = np.zeros((len(angles),2))
+        for i in angles:
+            end_point = np.array([100000,100000]) 
+            for k in range(len(object_list)):
+                rospy.loginfo("walls: {}".format(len(object_list)))
+                line      = Pose2D(test_point[0],test_point[1],i)
+                #name      = String()
+                #name.data = object_list[k]
+                req       = RequestInterRequest(str(object_list[k]),line,1000)
+                rospy.loginfo("req: {}".format(req))
+                response  = intersect(req)
+                rospy.loginfo("response: {}".format(response))
+                new_point = np.array([response.x,response.y])
 
-        for walls in wall_objects:
+                if np.linalg.norm(new_point-test_point) <= np.linalg.norm(end_point-test_point):
+                    end_point = new_point
 
-            intersection = rogata.intersect(walls,guard,direction,max_seeing_distance)
-            if np.linalg.norm(intersection-guard) <= np.linalg.norm(min_intersect-guard):
-                min_intersect = intersection
+            scan[i,:] = end_point
 
-        if np.linalg.norm(min_intersect-guard) >= distance:
-            return 1
-        else:
-            return 0
+        rospy.loginfo("laser_scan: {}".format(scan))
 
 
     def generate_map(self):

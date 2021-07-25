@@ -55,7 +55,7 @@ class Predict_guard_movement:
 
         #
 
-        rospy.loginfo("guard_prediction_perception: {}".format(self.current_state_guard))
+        #rospy.loginfo("guard_prediction_perception: {}".format(self.current_state_guard))
 
         self.predict_future()
 
@@ -65,7 +65,7 @@ class Predict_guard_movement:
         
     def predict_future(self):
         self.v2_same_movement()
-        rospy.loginfo("future_guard_position: {}".format(self.future_state_guard))
+        #rospy.loginfo("future_guard_position: {}".format(self.future_state_guard))
         #choice = np.argmax(self.score)
         #if choice == 0:
         #    self.v1_standing_still()
