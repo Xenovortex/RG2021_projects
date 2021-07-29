@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 import os
+from os.path import join, abspath, dirname 
+
+#from rogata_library.rogata_library import rogata_helper
 import rospy
 import math
 import sys
@@ -14,7 +17,7 @@ import rospkg
 
 class Guard_avoidance:
 
-    def __init__(self):
+    def __init__(self, rogata):
         self.evader_odom_topic = sys.argv[1]
         self.predict_guard_movement_topic = sys.argv[2]
         self.perception_topic = sys.argv[3]
@@ -23,6 +26,8 @@ class Guard_avoidance:
         self.future_state_evader = np.zeros(5) # TODO: get that from pathfinding somehow
         self.state_guard = np.zeros(5)
         self.future_state_guard = np.zeros(5)
+        self.rogata = rogata
+        self.save = False
 
         rate = rospy.Rate(0.5)  # 0.5hz
         rospy.Subscriber(self.evader_odom_topic, Odometry, self.odom_callback)  
@@ -51,7 +56,7 @@ class Guard_avoidance:
         self.state_evader[2] = orientation
         self.state_evader[3] = linear_v
         self.state_evader[4] = angular_w
-        #rospy.loginfo("guard_avoidance_odom: {}".format(self.state_evader))
+        rospy.loginfo("guard_avoidance_odom: {}".format(self.state_evader))
 
 
     def prediction_callback(self, odom):
@@ -72,7 +77,9 @@ class Guard_avoidance:
         self.future_state_guard[3] = linear_v
         self.future_state_guard[4] = angular_w
 
-        #rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
+        rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
+        self.laser_scanner(["walls_obj"], self.state_guard[0:2], np.arange(-3.14, 3.14, 0.01))
+        #self.visibility(self.state_evader, self.state_guard, ["walls_obj"], 1000)
 
         # DUMMY DATA
         self.pub.publish(odom)
@@ -95,54 +102,75 @@ class Guard_avoidance:
         self.state_guard[3] = linear_v
         self.state_guard[4] = angular_w
 
-        #rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
+        rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
         rospy.loginfo("walls: {}".format(["walls_obj"]))
-        self.laser_scanner(["walls_obj"], self.state_guard, np.arange(-10, 10, 0.1))
+        
 
 
     def laser_scanner(self, object_list,test_point,angles):
-        # rospack    = rospkg.RosPack()
-        # catch_path = rospack.get_path('heist')
-
-        # filepath   = os.path.join(catch_path, 'maps/left_wall.npy')
-        # left_wall  = np.load(filepath)
-        # filepath   = os.path.join(catch_path, 'maps/right_wall.npy')
-        # right_wall = np.load(filepath)
-        # filepath   = os.path.join(catch_path, 'maps/outer_wall.npy')
-        # outer_wall = np.load(filepath)
-        # walls_obj  = rgt.game_object('walls_obj', [right_wall,left_wall,outer_wall], np.array([1]))
-        intersect = rospy.ServiceProxy('intersect_line',RequestInter)
-        # rogata = rgt.scene([walls_obj])
         scan = np.zeros((len(angles),2))
-        for i in angles:
+        for i, angle in enumerate(angles):
             end_point = np.array([100000,100000]) 
-            for k in range(len(object_list)):
-                rospy.loginfo("walls: {}".format(len(object_list)))
-                line      = Pose2D(test_point[0],test_point[1],i)
+            for obj in object_list:
+                rospy.loginfo("walls2: {}".format(len(object_list)))
+                #line      = Pose2D(test_point[0],test_point[1],i)
                 #name      = String()
-                #name.data = object_list[k]
-                req       = RequestInterRequest(str(object_list[k]),line,1000)
-                rospy.loginfo("req: {}".format(req))
-                response  = intersect(req)
+                #name.data = obj
+                #req       = RequestInterRequest(str(obj),line,1000)
+                #rospy.loginfo("req: {}".format(req))
+                #distance   = np.linalg.norm(self.state_evader[0:2]-self.state_guard[0:2])
+                #direction  = (self.state_evader[0:2]-self.state_guard[0:2])/distance
+                #direction  = np.arctan2(direction[1],direction[0])
+                response  = self.rogata.intersect(obj, test_point, angle, 1000)
                 rospy.loginfo("response: {}".format(response))
-                new_point = np.array([response.x,response.y])
+                new_point = np.array([response[0],response[1]])
 
                 if np.linalg.norm(new_point-test_point) <= np.linalg.norm(end_point-test_point):
+                    rospy.loginfo("hi {}".format(new_point))
                     end_point = new_point
+                    
 
             scan[i,:] = end_point
-
+        rospy.loginfo("angles: {}".format(angles))
         rospy.loginfo("laser_scan: {}".format(scan))
+        if self.save == False:
+            path = join(dirname(abspath(__file__)), "laser_scan.npy")
+            rospy.loginfo("{}".format(path))
+            np.save(path, scan)
+            self.save = True
 
 
     def generate_map(self):
         pass
 
+
+    def visibility(self, guard,thief,wall_objects,max_seeing_distance):
+        distance   = np.linalg.norm(thief-guard)
+        direction  = (thief-guard)/distance
+        direction  = np.arctan2(direction[1],direction[0])
+
+        min_intersect = guard + max_seeing_distance * np.array([np.cos(direction),np.sin(direction)])
+        rospy.loginfo("walls client: {}".format(len(wall_objects)))
+        for walls in wall_objects:
+
+            intersection = rogata.intersect(walls,guard,direction,max_seeing_distance)
+            if np.linalg.norm(intersection-guard) <= np.linalg.norm(min_intersect-guard):
+                min_intersect = intersection
+
+        if np.linalg.norm(min_intersect-guard) >= distance:
+            return 1
+        else:
+            return 0
+    
         
 
 if __name__ == '__main__':
     rospy.init_node("Guard_avoidance")
+    
     try:
-        node = Guard_avoidance()
+        rospy.loginfo("Before helper")
+        rogata = rgt.rogata_helper()
+        rospy.loginfo("After helper")
+        node = Guard_avoidance(rogata)
     except rospy.ROSInterruptException:
         pass

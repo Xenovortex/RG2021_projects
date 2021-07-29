@@ -61,12 +61,11 @@
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg second_tb3) -x $(arg second_tb3_x_pos) -y $(arg second_tb3_y_pos) -z $(arg second_tb3_z_pos) -Y $(arg second_tb3_yaw) -param robot_description" />
     
     <node name="evader_perception" type="perception.py" pkg="heist" args="/guard/odom /evader/perception_of_guard 1.0 1.0" />
-    <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /evader/perception_of_guard /guard_avoidance" output="screen"/>
     <node name="Predict_guard_movement" type="predict_guard_movement.py" pkg="heist" args="/evader/perception_of_guard /predict_movement/guard" output="screen"/>
 
   </group>
 
-
+  <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /evader/perception_of_guard /guard_avoidance" output="screen"/>
   <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />
   <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
   <node name="heist_client" type="heist_client.py" pkg="heist" output="screen"/>  
