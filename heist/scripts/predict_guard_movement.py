@@ -53,7 +53,6 @@ class Predict_guard_movement:
         self.current_state_guard[4] = angular_w
 
 
-        #
 
         #rospy.loginfo("guard_prediction_perception: {}".format(self.current_state_guard))
 

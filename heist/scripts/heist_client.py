@@ -11,7 +11,7 @@ def visibility(guard,thief,wall_objects,max_seeing_distance):
     direction  = np.arctan2(direction[1],direction[0])
 
     min_intersect = guard + max_seeing_distance * np.array([np.cos(direction),np.sin(direction)])
-    rospy.loginfo("walls client: {}".format(len(wall_objects)))
+    #rospy.loginfo("walls client: {}".format(len(wall_objects)))
     for walls in wall_objects:
 
         intersection = rogata.intersect(walls,guard,direction,max_seeing_distance)

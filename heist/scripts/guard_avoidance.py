@@ -56,7 +56,7 @@ class Guard_avoidance:
         self.state_evader[2] = orientation
         self.state_evader[3] = linear_v
         self.state_evader[4] = angular_w
-        rospy.loginfo("guard_avoidance_odom: {}".format(self.state_evader))
+        #rospy.loginfo("guard_avoidance_odom: {}".format(self.state_evader))      
 
 
     def prediction_callback(self, odom):
@@ -77,9 +77,9 @@ class Guard_avoidance:
         self.future_state_guard[3] = linear_v
         self.future_state_guard[4] = angular_w
 
-        rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
-        self.laser_scanner(["walls_obj"], self.state_guard[0:2], np.arange(-3.14, 3.14, 0.01))
+        #rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
         #self.visibility(self.state_evader, self.state_guard, ["walls_obj"], 1000)
+        self.laser_scanner(["walls_obj"], self.state_guard[0:2], np.arange(-3.14, 3.14, 0.02))
 
         # DUMMY DATA
         self.pub.publish(odom)
@@ -102,67 +102,47 @@ class Guard_avoidance:
         self.state_guard[3] = linear_v
         self.state_guard[4] = angular_w
 
-        rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
-        rospy.loginfo("walls: {}".format(["walls_obj"]))
+        #rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
+        #rospy.loginfo("walls: {}".format(["walls_obj"]))
         
 
 
     def laser_scanner(self, object_list,test_point,angles):
+        test_point = np.array([test_point[0],-test_point[1]])*100+np.array([500,500])
+
         scan = np.zeros((len(angles),2))
         for i, angle in enumerate(angles):
             end_point = np.array([100000,100000]) 
             for obj in object_list:
-                rospy.loginfo("walls2: {}".format(len(object_list)))
-                #line      = Pose2D(test_point[0],test_point[1],i)
-                #name      = String()
-                #name.data = obj
-                #req       = RequestInterRequest(str(obj),line,1000)
-                #rospy.loginfo("req: {}".format(req))
-                #distance   = np.linalg.norm(self.state_evader[0:2]-self.state_guard[0:2])
-                #direction  = (self.state_evader[0:2]-self.state_guard[0:2])/distance
-                #direction  = np.arctan2(direction[1],direction[0])
                 response  = self.rogata.intersect(obj, test_point, angle, 1000)
-                rospy.loginfo("response: {}".format(response))
+                #rospy.loginfo("response: {}".format(response))
                 new_point = np.array([response[0],response[1]])
 
                 if np.linalg.norm(new_point-test_point) <= np.linalg.norm(end_point-test_point):
-                    rospy.loginfo("hi {}".format(new_point))
+                    #rospy.loginfo("hi {}".format(new_point))
                     end_point = new_point
                     
 
             scan[i,:] = end_point
+    
+
+            sim_scan = (scan - np.tile(np.array([500,500]), (len(angles), 1))) / 100
+        # pixel: x: -1000, 1000 y: -1000, 1000
+        # gazebo: x:-5, 5
+
+        rospy.loginfo("sim_scan: {}".format(sim_scan))
         rospy.loginfo("angles: {}".format(angles))
         rospy.loginfo("laser_scan: {}".format(scan))
+        # save data to plot
         if self.save == False:
             path = join(dirname(abspath(__file__)), "laser_scan.npy")
             rospy.loginfo("{}".format(path))
-            np.save(path, scan)
+            np.save(path, sim_scan)
             self.save = True
 
 
     def generate_map(self):
         pass
-
-
-    def visibility(self, guard,thief,wall_objects,max_seeing_distance):
-        distance   = np.linalg.norm(thief-guard)
-        direction  = (thief-guard)/distance
-        direction  = np.arctan2(direction[1],direction[0])
-
-        min_intersect = guard + max_seeing_distance * np.array([np.cos(direction),np.sin(direction)])
-        rospy.loginfo("walls client: {}".format(len(wall_objects)))
-        for walls in wall_objects:
-
-            intersection = rogata.intersect(walls,guard,direction,max_seeing_distance)
-            if np.linalg.norm(intersection-guard) <= np.linalg.norm(min_intersect-guard):
-                min_intersect = intersection
-
-        if np.linalg.norm(min_intersect-guard) >= distance:
-            return 1
-        else:
-            return 0
-    
-        
 
 if __name__ == '__main__':
     rospy.init_node("Guard_avoidance")
