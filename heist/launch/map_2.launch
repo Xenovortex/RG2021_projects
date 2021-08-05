@@ -3,13 +3,13 @@
   <env name="GAZEBO_MODEL_PATH" value="$(find heist)/models:$(optenv GAZEBO_MODEL_PATH)" />
 
   <!-- set params for initialization -->
-  <param name="szenario" value="map_1"/>
+  <param name="szenario" value="map_2"/>
   <arg name="model" default="burger"/>
   <arg name="first_tb3"  default="guard"/>
   <arg name="second_tb3" default="evader"/>
 
   <!-- guard start position -->
-  <arg name="first_tb3_x_pos" default="-1.0"/>
+  <arg name="first_tb3_x_pos" default=" 0.0"/>
   <arg name="first_tb3_y_pos" default=" 2.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
   <arg name="first_tb3_yaw"   default=" 0.0"/>
@@ -17,8 +17,8 @@
   <param name="guard_start_pos_y" value="$(arg first_tb3_y_pos)"/>
 
   <!-- evader start position -->
-  <arg name="second_tb3_x_pos" default=" 2.0"/>
-  <arg name="second_tb3_y_pos" default="-1.0"/>
+  <arg name="second_tb3_x_pos" default=" 4.5"/>
+  <arg name="second_tb3_y_pos" default=" 0.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
   <arg name="second_tb3_yaw"   default=" 1.57"/>
   <param name="evader_start_pos_x" value="$(arg second_tb3_x_pos)"/>
@@ -26,7 +26,7 @@
 
   <!-- empty world simulation -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find heist)/worlds/map_1.world"/>
+    <arg name="world_name" value="$(find heist)/worlds/map_2.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -64,7 +64,7 @@
   </group>
 
 
-  <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />
+  <node name="map_2_setup" type="map_2_setup.py" pkg="heist"  />
   <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
   <node name="heist_client" type="heist_client.py" pkg="heist"  />  
   
