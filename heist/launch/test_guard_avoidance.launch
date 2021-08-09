@@ -7,6 +7,9 @@
   <arg name="model" default="burger"/>
   <arg name="first_tb3"  default="guard"/>
   <arg name="second_tb3" default="evader"/>
+  <arg name="move_forward_only" default="false"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="map_file" default="$(find heist)/maps/map_1.yaml"/>
 
   <!-- guard start position -->
   <arg name="first_tb3_x_pos" default="-1.0"/>
@@ -17,7 +20,7 @@
   <param name="guard_start_pos_y" value="$(arg first_tb3_y_pos)"/>
 
   <!-- evader start position -->
-  <arg name="second_tb3_x_pos" default=" 2.0"/>
+  <arg name="second_tb3_x_pos" default=" 4.0"/>
   <arg name="second_tb3_y_pos" default="-1.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
   <arg name="second_tb3_yaw"   default=" 1.57"/>
@@ -33,6 +36,12 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>  
+
+
+   <!-- Map server -->
+  	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)">
+      <param name="frame_id" value="map" />
+    </node>
 
 
   <!-- guard -->
@@ -63,7 +72,33 @@
     <node name="evader_perception" type="perception.py" pkg="heist" args="/guard/odom /evader/perception_of_guard 1.0 1.0" />
     <node name="Predict_guard_movement" type="predict_guard_movement.py" pkg="heist" args="/evader/perception_of_guard /predict_movement/guard" output="screen"/>
 
+  <!-- Turtlebot3 -->
+  	<!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    	<arg name="model" value="$(arg model)"/>
+  	</include> -->
+
+  <!-- AMCL -->
+  	<include file="$(find heist)/launch/amcl.launch">
+  		<arg name="initial_pose_x" value="$(arg second_tb3_x_pos)"/>
+  		<arg name="initial_pose_y" value="$(arg second_tb3_y_pos)"/>      
+  	</include>
+
+	<!-- move_base -->
+  	<include file="$(find heist)/launch/move_base.launch">
+    	<arg name="model" value="$(arg model)" />
+    	<arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  	</include>
+
+    <remap from="map" to="/map" />
+    <node name="movebase_client" type="movebase_client.py" pkg="heist" output="screen"/> 
+
   </group>
+
+  <!-- rviz -->
+  	<group if="$(arg open_rviz)"> 
+    	<node pkg="rviz" type="rviz" name="rviz" required="true"
+          	args="-d $(find heist)/rviz/turtlebot3_navigation.rviz"/>
+	  </group>
 
   <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /evader/perception_of_guard /guard_avoidance" output="screen"/>
   <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />

@@ -9,11 +9,8 @@ import sys
 import numpy as np
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Pose2D
 import rogata_library as rgt
 from rogata_engine.srv import *
-import rospkg
-
 
 class Guard_avoidance:
 
@@ -125,14 +122,15 @@ class Guard_avoidance:
 
             scan[i,:] = end_point
     
-
+            
             sim_scan = (scan - np.tile(np.array([500,500]), (len(angles), 1))) / 100
+            sim_scan[:, 1] = -sim_scan[:, 1]
         # pixel: x: -1000, 1000 y: -1000, 1000
         # gazebo: x:-5, 5
 
-        rospy.loginfo("sim_scan: {}".format(sim_scan))
-        rospy.loginfo("angles: {}".format(angles))
-        rospy.loginfo("laser_scan: {}".format(scan))
+        #rospy.loginfo("sim_scan: {}".format(sim_scan))
+        #rospy.loginfo("angles: {}".format(angles))
+        #rospy.loginfo("laser_scan: {}".format(scan))
         # save data to plot
         if self.save == False:
             path = join(dirname(abspath(__file__)), "laser_scan.npy")
