@@ -31,13 +31,18 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find heist)/worlds/map_1.world"/>
     <arg name="paused" value="false"/>
-    <!-- <arg name="use_sim_time" value="true"/> -->
+    <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>  
 
-
+    <!-- <remap from="/move_base/goal" to="/evader/move_base/goal"/>
+    <remap from="/move_base/status" to="/evader/move_base/status"/>
+    <remap from="/move_base/result" to="/evader/move_base/result"/>
+    <remap from="/move_base/feedback" to="/evader/move_base/feedback"/>
+    <remap from="/move_base/cancel" to="/evader/move_base/cancel"/> -->
+    
    <!-- Map server -->
   	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)">
       <param name="frame_id" value="map" />
@@ -92,7 +97,8 @@
       <arg name="odom_topic" value="/evader/odom" />
   	</include>
 
-    <node name="movebase_client" type="movebase_client.py" pkg="heist" output="screen"/> 
+    
+  <node name="movebase_client" type="movebase_client.py" pkg="heist" output="screen"/>
 
   </group>
 
@@ -105,6 +111,12 @@
   <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /evader/perception_of_guard /guard_avoidance" output="screen"/>
   <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />
   <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
-  <node name="heist_client" type="heist_client.py" pkg="heist" output="screen"/>  
+  <node name="heist_client" type="heist_client.py" pkg="heist" output="screen"/> 
+  <node name="information_service" type="information_service.py" pkg="heist" output="screen"/>
+
+  <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
+  <node name="static_tf1" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_footprint 10"/>
+  <node name="static_tf2" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 10"/>
+
   
 </launch>
