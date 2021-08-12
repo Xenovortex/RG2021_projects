@@ -11,6 +11,9 @@ from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 import rogata_library as rgt
 from rogata_engine.srv import *
+from sensor_msgs.msg import PointCloud
+from geometry_msgs.msg import Point32
+import std_msgs.msg
 
 class Guard_avoidance:
 
@@ -25,13 +28,16 @@ class Guard_avoidance:
         self.future_state_guard = np.zeros(5)
         self.rogata = rogata
         self.save = False
+        self.num_angles = 300
+        self.num_interpolate = 20
+        self.pointcloud = np.zeros((self.num_angles * self.num_interpolate, 2))
 
         rate = rospy.Rate(0.5)  # 0.5hz
         rospy.Subscriber(self.evader_odom_topic, Odometry, self.odom_callback)  
         rospy.Subscriber(self.predict_guard_movement_topic, Odometry, self.prediction_callback)        
         rospy.Subscriber(self.perception_topic, Odometry, self.perception_callback)
         
-        self.pub = rospy.Publisher(self.published_topic, Odometry, queue_size=10)
+        self.pub = rospy.Publisher(self.published_topic, PointCloud, queue_size=10)
 
         while not rospy.is_shutdown():
             rate.sleep()
@@ -76,10 +82,18 @@ class Guard_avoidance:
 
         #rospy.loginfo("guard_avoidance_prediction: {}".format(self.state_evader))
         #self.visibility(self.state_evader, self.state_guard, ["walls_obj"], 1000)
-        self.laser_scanner(["walls_obj"], self.state_guard[0:2], np.arange(-3.14, 3.14, 0.02))
+        self.laser_scanner(["walls_obj"], self.state_guard[0:2], np.linspace(-3.14, 3.14, self.num_angles)) # 0.1
+        # move to laser scan later
+        pointcloud = PointCloud()
+        header = std_msgs.msg.Header()
+        header.stamp = rospy.Time.now()
+        header.frame_id = 'base_link' #base_laser_link
+        pointcloud.header = header
 
-        # DUMMY DATA
-        self.pub.publish(odom)
+        for i in range(len(self.pointcloud)):
+            pointcloud.points.append(Point32(self.pointcloud[i, 0], self.pointcloud[i, 1], 0.0))
+
+        self.pub.publish(pointcloud)
     
     def perception_callback(self, odom):
         orientation = euler_from_quaternion([odom.pose.pose.orientation.x,
@@ -101,6 +115,12 @@ class Guard_avoidance:
 
         #rospy.loginfo("guard_avoidance_perception: {}".format(self.state_guard))
         #rospy.loginfo("walls: {}".format(["walls_obj"]))
+
+
+    def interpolate(self, laser_scan):
+        x_new = np.linspace(self.state_guard[0], laser_scan[0], self.num_interpolate)
+        y_new = np.linspace(self.state_guard[1], laser_scan[1], self.num_interpolate)
+        return x_new, y_new
         
 
 
@@ -123,10 +143,13 @@ class Guard_avoidance:
             scan[i,:] = end_point
     
             
-            sim_scan = (scan - np.tile(np.array([500,500]), (len(angles), 1))) / 100
-            sim_scan[:, 1] = -sim_scan[:, 1]
+        sim_scan = (scan - np.tile(np.array([500,500]), (len(angles), 1))) / 100
+        sim_scan[:, 1] = -sim_scan[:, 1]
         # pixel: x: -1000, 1000 y: -1000, 1000
         # gazebo: x:-5, 5
+
+        pointcloud = np.apply_along_axis(self.interpolate, 1, sim_scan)
+        self.pointcloud = np.swapaxes(pointcloud, 1, 2).reshape(-1, 2)
 
         #rospy.loginfo("sim_scan: {}".format(sim_scan))
         #rospy.loginfo("angles: {}".format(angles))
@@ -135,7 +158,7 @@ class Guard_avoidance:
         if self.save == False:
             path = join(dirname(abspath(__file__)), "laser_scan.npy")
             rospy.loginfo("{}".format(path))
-            np.save(path, sim_scan)
+            np.save(path, self.pointcloud)
             self.save = True
 
 

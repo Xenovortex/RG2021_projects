@@ -117,6 +117,6 @@
   <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
   <node name="static_tf1" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_footprint 10"/>
   <node name="static_tf2" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 10"/>
-
+  <node name="static_tf3" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_laser_link 10"/>
   
 </launch>
