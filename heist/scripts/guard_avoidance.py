@@ -11,9 +11,10 @@ from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 import rogata_library as rgt
 from rogata_engine.srv import *
-from sensor_msgs.msg import PointCloud
+from sensor_msgs.msg import PointCloud2
 from geometry_msgs.msg import Point32
 import std_msgs.msg
+import sensor_msgs.point_cloud2 as pcl2
 
 class Guard_avoidance:
 
@@ -37,7 +38,7 @@ class Guard_avoidance:
         rospy.Subscriber(self.predict_guard_movement_topic, Odometry, self.prediction_callback)        
         rospy.Subscriber(self.perception_topic, Odometry, self.perception_callback)
         
-        self.pub = rospy.Publisher(self.published_topic, PointCloud, queue_size=10)
+        self.pub = rospy.Publisher(self.published_topic, PointCloud2, queue_size=10)
 
         while not rospy.is_shutdown():
             rate.sleep()
@@ -84,14 +85,11 @@ class Guard_avoidance:
         #self.visibility(self.state_evader, self.state_guard, ["walls_obj"], 1000)
         self.laser_scanner(["walls_obj"], self.state_guard[0:2], np.linspace(-3.14, 3.14, self.num_angles)) # 0.1
         # move to laser scan later
-        pointcloud = PointCloud()
+        
         header = std_msgs.msg.Header()
         header.stamp = rospy.Time.now()
         header.frame_id = 'base_link' #base_laser_link
-        pointcloud.header = header
-
-        for i in range(len(self.pointcloud)):
-            pointcloud.points.append(Point32(self.pointcloud[i, 0], self.pointcloud[i, 1], 0.0))
+        pointcloud = pcl2.create_cloud_xyz32(header, self.pointcloud)
 
         self.pub.publish(pointcloud)
     
@@ -150,6 +148,9 @@ class Guard_avoidance:
 
         pointcloud = np.apply_along_axis(self.interpolate, 1, sim_scan)
         self.pointcloud = np.swapaxes(pointcloud, 1, 2).reshape(-1, 2)
+        #self.pointcloud = sim_scan
+        #self.pointcloud = np.concatenate((self.pointcloud, np.zeros((self.pointcloud.shape[0], 1))), axis=1)
+        self.pointcloud = np.concatenate((self.pointcloud, np.full((self.pointcloud.shape[0], 1), 0.1)), axis=1)
 
         #rospy.loginfo("sim_scan: {}".format(sim_scan))
         #rospy.loginfo("angles: {}".format(angles))
