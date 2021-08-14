@@ -47,12 +47,12 @@ class Goal_memory:
 
     def goal_callback(self, goal):
         self.goal_out = np.fromstring(goal.data, dtype=float, sep=' ')
-        rospy.loginfo("mb_c: goal: {}, {}".format(self.goal_out, self.goal_out.dtype))
+        #rospy.loginfo("mb_c: goal: {}, {}".format(self.goal_out, self.goal_out.dtype))
         self.goal_ready = True
 
     def entry_callback(self, entry):
         self.entry_out = np.fromstring(entry.data, dtype=float, sep=' ')
-        rospy.loginfo("mb_c: entry: {}, {}".format(self.entry_out, self.entry_out.dtype))
+        #rospy.loginfo("mb_c: entry: {}, {}".format(self.entry_out, self.entry_out.dtype))
         self.entry_ready = True
 
 
@@ -68,8 +68,8 @@ if __name__ == '__main__':
         while not (check_msg.goal_ready and check_msg.entry_ready):
             rate.sleep()
             
-        rospy.loginfo("mb_c2: goal: {}, {}".format(check_msg.goal_out, check_msg.goal_out.dtype))
-        rospy.loginfo("mb_c2: entry: {}, {}".format(check_msg.entry_out, check_msg.entry_out.dtype))
+        #rospy.loginfo("mb_c2: goal: {}, {}".format(check_msg.goal_out, check_msg.goal_out.dtype))
+        #rospy.loginfo("mb_c2: entry: {}, {}".format(check_msg.entry_out, check_msg.entry_out.dtype))
 
         rospy.loginfo("movebase_client: sending goal 1")
         result = movebase_client(check_msg.goal_out[0], check_msg.goal_out[1], 0.0, 1.0)

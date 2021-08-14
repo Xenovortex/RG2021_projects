@@ -17,4 +17,4 @@ while True:
     
     rospy.loginfo("clear costmaps: {}".format(service_example))
 
-    rospy.sleep(10)
+    rospy.sleep(4)

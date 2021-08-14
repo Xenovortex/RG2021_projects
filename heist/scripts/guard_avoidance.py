@@ -29,11 +29,11 @@ class Guard_avoidance:
         self.future_state_guard = np.zeros(5)
         self.rogata = rogata
         self.save = False
-        self.num_angles = 300
-        self.num_interpolate = 20
+        self.num_angles = 600
+        self.num_interpolate = 30
         self.pointcloud = np.zeros((self.num_angles * self.num_interpolate, 2))
 
-        rate = rospy.Rate(0.5)  # 0.5hz
+        rate = rospy.Rate(10)  # 0.5hz
         rospy.Subscriber(self.evader_odom_topic, Odometry, self.odom_callback)  
         rospy.Subscriber(self.predict_guard_movement_topic, Odometry, self.prediction_callback)        
         rospy.Subscriber(self.perception_topic, Odometry, self.perception_callback)

@@ -76,7 +76,7 @@
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg second_tb3) -x $(arg second_tb3_x_pos) -y $(arg second_tb3_y_pos) -z $(arg second_tb3_z_pos) -Y $(arg second_tb3_yaw) -param robot_description" />
     
     <node name="evader_perception" type="perception.py" pkg="heist" args="/guard/odom /evader/perception_of_guard 1.0 1.0" />
-    <node name="Predict_guard_movement" type="predict_guard_movement.py" pkg="heist" args="/evader/perception_of_guard /predict_movement/guard" output="screen"/>
+    <node name="Predict_guard_movement" type="predict_guard_movement.py" pkg="heist" args="/odometry/filtered /predict_movement/guard" output="screen"/>
 
   <!-- Turtlebot3 -->
   	<!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
@@ -108,7 +108,11 @@
           	args="-d $(find heist)/rviz/turtlebot3_navigation.rviz"/>
 	  </group>
 
-  <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /evader/perception_of_guard /guard_avoidance" output="screen"/>
+  <node pkg="robot_localization" type="ukf_localization_node" name="ukf_se" clear_params="true">
+    <rosparam command="load" file="$(find heist)/params/ukf_template.yaml" />
+  </node>
+
+  <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /odometry/filtered /guard_avoidance" output="screen"/>
   <node name="map_2_setup" type="map_2_setup.py" pkg="heist"  />
   <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
   <node name="heist_client" type="heist_client.py" pkg="heist" output="screen"/> 
@@ -118,6 +122,7 @@
   <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
   <node name="static_tf1" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_footprint 10"/>
   <node name="static_tf2" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 10"/>
-  <node name="static_tf3" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_laser_link 10"/>
+  <node name="static_tf3" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_scan 10"/>
+
   
 </launch>

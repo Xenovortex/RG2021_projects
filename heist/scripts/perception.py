@@ -4,6 +4,7 @@ import math
 import sys
 import numpy as np
 from nav_msgs.msg import Odometry
+import std_msgs
 
 
 class Perception:
@@ -25,7 +26,10 @@ class Perception:
             rate.sleep()
 
     def source_callback(self, odom):
-        
+        self.percepted_odom.header = std_msgs.msg.Header()
+        self.percepted_odom.header.stamp = rospy.Time.now()
+        self.percepted_odom.header.frame_id = 'odom'
+
         self.percepted_odom.pose.pose.position.x = odom.pose.pose.position.x + np.random.normal(0, self.position_noise)
         self.percepted_odom.pose.pose.position.y = odom.pose.pose.position.y + np.random.normal(0, self.position_noise)
         self.percepted_odom.twist.twist.linear.x = odom.twist.twist.linear.x + np.random.normal(0, self.velocity_noise) 
