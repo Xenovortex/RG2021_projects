@@ -3,25 +3,27 @@
   <env name="GAZEBO_MODEL_PATH" value="$(find heist)/models:$(optenv GAZEBO_MODEL_PATH)" />
 
   <!-- set params for initialization -->
-  <param name="szenario" value="map_1"/>
+  <param name="szenario" value="map_2"/>
   <arg name="model" default="burger"/>
   <arg name="first_tb3"  default="guard"/>
   <arg name="second_tb3" default="evader"/>
   <arg name="move_forward_only" default="false"/>
   <arg name="open_rviz" default="true"/>
-  <arg name="map_file" default="$(find heist)/maps/map_1.yaml"/>
+  <arg name="map_file" default="$(find heist)/maps/map_2.yaml"/>
+  <arg name="noise" default="1.0"/>
+  <arg name="clearing" default="0"/>
 
   <!-- guard start position -->
-  <arg name="first_tb3_x_pos" default="-1.3"/>
-  <arg name="first_tb3_y_pos" default=" 4.0"/>
+  <arg name="first_tb3_x_pos" default=" 0.0"/>
+  <arg name="first_tb3_y_pos" default=" 2.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
   <arg name="first_tb3_yaw"   default=" 0.0"/>
   <param name="guard_start_pos_x" value="$(arg first_tb3_x_pos)"/>
   <param name="guard_start_pos_y" value="$(arg first_tb3_y_pos)"/>
 
   <!-- evader start position -->
-  <arg name="second_tb3_x_pos" default="-4.5"/>
-  <arg name="second_tb3_y_pos" default="0.0"/>
+  <arg name="second_tb3_x_pos" default=" 4.5"/>
+  <arg name="second_tb3_y_pos" default=" 0.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
   <arg name="second_tb3_yaw"   default=" 1.57"/>
   <param name="evader_start_pos_x" value="$(arg second_tb3_x_pos)"/>
@@ -29,19 +31,13 @@
 
   <!-- empty world simulation -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find heist)/worlds/map_1.world"/>
+    <arg name="world_name" value="$(find heist)/worlds/map_2.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>  
-
-    <!-- <remap from="/move_base/goal" to="/evader/move_base/goal"/>
-    <remap from="/move_base/status" to="/evader/move_base/status"/>
-    <remap from="/move_base/result" to="/evader/move_base/result"/>
-    <remap from="/move_base/feedback" to="/evader/move_base/feedback"/>
-    <remap from="/move_base/cancel" to="/evader/move_base/cancel"/> -->
     
    <!-- Map server -->
   	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)">
@@ -59,7 +55,7 @@
     
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg first_tb3) -x $(arg first_tb3_x_pos) -y $(arg first_tb3_y_pos) -z $(arg first_tb3_z_pos) -Y $(arg first_tb3_yaw) -param robot_description" />   
     
-    <node name="guard_perception" type="perception.py" pkg="heist" args="/evader/odom /guard/perception_of_evader 1.0 1.0" /> 
+    <node name="guard_perception" type="perception.py" pkg="heist" args="/evader/odom /guard/perception_of_evader $(arg noise) $(arg noise)" /> 
   </group>
 
 
@@ -75,13 +71,8 @@
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg second_tb3) -x $(arg second_tb3_x_pos) -y $(arg second_tb3_y_pos) -z $(arg second_tb3_z_pos) -Y $(arg second_tb3_yaw) -param robot_description" />
     
-    <node name="evader_perception" type="perception.py" pkg="heist" args="/guard/odom /evader/perception_of_guard 0.0 0.0" />
+    <node name="evader_perception" type="perception.py" pkg="heist" args="/guard/odom /evader/perception_of_guard $(arg noise) $(arg noise)" />
     <node name="Predict_guard_movement" type="predict_guard_movement.py" pkg="heist" args="/odometry/filtered /predict_movement/guard" output="screen"/>
-
-  <!-- Turtlebot3 -->
-  	<!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
-    	<arg name="model" value="$(arg model)"/>
-  	</include> -->
 
   <!-- AMCL -->
   	<include file="$(find heist)/launch/amcl.launch">
@@ -95,6 +86,8 @@
     	<arg name="move_forward_only" value="$(arg move_forward_only)"/>
       <arg name="cmd_vel_topic" value="/evader/cmd_vel" />
       <arg name="odom_topic" value="/evader/odom" />
+      <arg name="mode" value="laserscan"/>
+      <arg name="map" value="2"/>
   	</include>
 
     
@@ -127,12 +120,12 @@
   </node>
 
   <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /odometry/filtered /guard_avoidance" output="screen"/>
-  <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />
+  <node name="map_2_setup" type="map_2_setup.py" pkg="heist"  />
   <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
   <node name="heist_client" type="heist_client.py" pkg="heist" output="screen"/> 
   <node name="information_service" type="information_service.py" pkg="heist" output="screen"/>
-  <!-- <node name="clear_costmap" type="clear_costmap.py" pkg="heist" output="screen"/>  -->
-
+  <node name="clear_costmap" type="clear_costmap.py" pkg="heist" args="$(arg clearing)" output="screen"/> 
+  
   <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
   <node name="static_tf1" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_footprint 10"/>
   <node name="static_tf2" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 10"/> 

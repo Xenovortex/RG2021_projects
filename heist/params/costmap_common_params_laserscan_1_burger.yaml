@@ -4,7 +4,7 @@ raytrace_range: 15.0
 footprint: [[-0.105, -0.105], [-0.105, 0.105], [0.041, 0.105], [0.041, -0.105]]
 #robot_radius: 0.105
 
-inflation_radius: 0.5
+inflation_radius: 0.4
 cost_scaling_factor: 2.0
 
 map_type: costmap
@@ -12,4 +12,4 @@ observation_sources: scan point_cloud_sensor
 
 scan: {sensor_frame: base_scan, data_type: LaserScan, topic: /evader/scan, marking: true, clearing: true}
 
-point_cloud_sensor: {sensor_frame: base_link, data_type: PointCloud2, topic: /guard_avoidance, marking: true, clearing: true}
+point_cloud_sensor: {sensor_frame: base_scan, data_type: LaserScan, topic: /guard_avoidance/scan, marking: true, clearing: true}

@@ -157,10 +157,21 @@ class Guard_avoidance:
         #rospy.loginfo("laser_scan: {}".format(scan))
         # save data to plot
         if self.save == False:
-            path = join(dirname(abspath(__file__)), "laser_scan.npy")
-            rospy.loginfo("{}".format(path))
-            np.save(path, self.pointcloud)
+            cloud_path = join(dirname(abspath(__file__)), "pointcloud.npy")
+            rospy.loginfo("{}".format(cloud_path))
+            np.save(cloud_path, self.pointcloud)
+
+            intersect_path = join(dirname(abspath(__file__)), "laser_scan.npy")
+            rospy.loginfo("{}".format(intersect_path))
+            np.save(intersect_path, sim_scan)
+            
+            scan_pixel_path = join(dirname(abspath(__file__)), "laser_scan_pixel.npy")
+            rospy.loginfo("{}".format(intersect_path))
+            np.save(scan_pixel_path, scan)
+            
             self.save = True
+
+            
 
 
     def generate_map(self):
