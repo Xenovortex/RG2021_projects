@@ -1,4 +1,4 @@
-image: /home/leo/catkin_ws/src/RG2021_projects/heist/maps/map_1.pgm
+image: ./map_1.pgm
 resolution: 0.0100000
 origin: [-5.000000, -5.000000, 0.000000]
 negate: 0

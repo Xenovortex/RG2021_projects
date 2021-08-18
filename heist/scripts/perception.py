@@ -25,6 +25,7 @@ class Perception:
             self.pub.publish(self.percepted_odom)
             rate.sleep()
 
+
     def source_callback(self, odom):
         self.percepted_odom.header = std_msgs.msg.Header()
         self.percepted_odom.header.stamp = rospy.Time.now()

@@ -11,7 +11,7 @@
   <arg name="open_rviz" default="true"/>
   <arg name="map_file" default="$(find heist)/maps/map_2.yaml"/>
   <arg name="noise" default="1.0"/>
-  <arg name="clearing" default="0"/>
+  <arg name="clearing" default="1"/>
 
   <!-- guard start position -->
   <arg name="first_tb3_x_pos" default=" 0.0"/>
@@ -115,17 +115,22 @@
     <remap from="scan" to="/guard_avoidance/scan"/>
   </node>
 
+  <!-- UKF -->
   <node pkg="robot_localization" type="ukf_localization_node" name="ukf_se" clear_params="true">
     <rosparam command="load" file="$(find heist)/params/ukf_template.yaml" />
   </node>
 
-  <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /odometry/filtered /guard_avoidance" output="screen"/>
-  <node name="map_2_setup" type="map_2_setup.py" pkg="heist"  />
+  <!-- game setup -->
+  <node name="map_1_setup" type="map_1_setup.py" pkg="heist"  />
   <node name="heist_tracker" type="heist_tracker.py" pkg="heist"  /> 
   <node name="heist_client" type="heist_client.py" pkg="heist" output="screen"/> 
+
+  <!--guard avoidance and costmap clearing-->
+  <node name="Guard_avoidance" type="guard_avoidance.py" pkg="heist" args="/evader/odom /predict_movement/guard /odometry/filtered /guard_avoidance" output="screen"/>
   <node name="information_service" type="information_service.py" pkg="heist" output="screen"/>
   <node name="clear_costmap" type="clear_costmap.py" pkg="heist" args="$(arg clearing)" output="screen"/> 
-  
+
+  <!-- static transformations -->  
   <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
   <node name="static_tf1" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_footprint 10"/>
   <node name="static_tf2" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 10"/> 
